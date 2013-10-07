@@ -3,16 +3,16 @@
 ###
 # This file is part of Ottd File scripts (OFS).
 #
-# Soap is free software; you can redistribute it and/or modify it under the
+# OFS is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, version 2.
 #
-# Soap is distributed in the hope that it will be useful, but WITHOUT ANY
+# OFS is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE.
 #
 # See the GNU General Public License for more details. You should have received
-# a copy of the GNU General Public License along with Soap. If not, see
+# a copy of the GNU General Public License along with OFS. If not, see
 # <http://www.gnu.org/licenses/>.
 ###
 
@@ -68,8 +68,8 @@ def main():
 
 def downloadFile(url, directory):
     try:
-        f = urllib2.urlopen(url)
         savefile = os.path.join(directory, os.path.basename(url))
+        f = urllib2.urlopen(url)
         with open(savefile, "wb") as local_file:
             local_file.write(f.read())
     except urllib2.HTTPError, e:
@@ -77,7 +77,7 @@ def downloadFile(url, directory):
     except urllib2.URLError, e:
         return (e.reason, url)
     except IOError:
-        return 'couln\'t write file'
+        return 'couldn\'t write file'
     return savefile
 
 def assignReturnValues():
