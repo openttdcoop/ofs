@@ -19,11 +19,14 @@
 import ConfigParser
 import sys
 import optparse
+import os
 import os.path
 import urllib2
 
 def main():
     ReturnValues = assignReturnValues()
+    # set current working directory to wherever ofs-getsave is located
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     oParser = optparse.OptionParser(usage='Usage: %prog [options] [server-id] savegame-url')
     oParser.add_option('-C', '--config',
         help = 'specify alternate configuration file',
@@ -35,7 +38,7 @@ def main():
     else:
         configfile = 'ofs.conf'
     if not os.path.isfile(configfile):
-        print 'Couldn\'t read configuration from %s. Please make sure it exists or supply a different file' % configfile
+        print 'Couldn\'t read configuration from %s. Please make sure it exists or supply a different file' % os.path.join(os.getcwd(), configfile))
         sys.exit(ReturnValues.get('INVALIDCONFIG'))
     config = ConfigParser.ConfigParser()
     config.read(configfile)
