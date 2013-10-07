@@ -64,17 +64,14 @@ def main():
     lastsave = getLatestAutoSave(autosavedir)
     parameters = config.get(serverID, 'parameters')
 
-    command = []
-    command.append(executable)
-    command.extend(['-D', '-f', '-c', serverconfig])
+    command = '%s -D -f -c %s' % (executable, serverconfig)
     if not lastsave == None and os.path.isfile(lastsave):
-        command.extend(['-g', lastsave])
+        command += ' -g %s' % lastsave
     if parameters:
-        parameters = parameters.split()
-        command.extend(parameters)
+        command += ' %s' % parameters
 
-    commandtext = ' '.join(command)
-    print 'Executing: %s' % commandtext
+    print 'Executing: %s' % command
+    command = command.split(' ')
     try:
         output = check_output(command)
     except OSError as e:
