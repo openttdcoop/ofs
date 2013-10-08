@@ -25,9 +25,9 @@ import os.path
 
 def main():
     ReturnValues = assignReturnValues()
-    # set current working directory to wherever ofs-getsave is located
+    # set current working directory to wherever ofs-start is located
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    oParser = optparse.OptionParser(usage='Usage: %prog [options] [server-id] savegame-url')
+    oParser = optparse.OptionParser(usage='Usage: %prog [options] [server-id]')
     oParser.add_option('-C', '--config',
         help = 'specify alternate configuration file',
         dest = 'configfile', default = None, metavar = 'CONFIGFILE', type = 'string')
@@ -146,4 +146,3 @@ def assignReturnValues():
 
 if __name__ == '__main__':
     main()
-check
