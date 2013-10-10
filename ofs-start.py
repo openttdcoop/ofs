@@ -130,12 +130,10 @@ def getLatestAutoSave(autosavedir):
 def assignReturnValues():
     values = {
         'SUCCESS'           : 0x00, # OpenTTD started succesfully, pid written to openttd.pid
-        'INVALIDCONFIG'     : 0x01, # Program could not read from configuration file.
-        'SERVERRUNNING'     : 0x02, # Game is already running, no point starting another instance
-        'SUCCESSNOPIDFILE'  : 0x03, # Openttd started succesfully, but could not write to openttd.pid
-        'FAILNOSERVERCONF'  : 0x04, # No OpenTTD configuration file found
-        'FAILEXECUTE'       : 0x05, # Couldn't run the command
-        'FAILNOPIDFOUND'    : 0x06, # No pid found in OpenTTD output, OpenTTD probably didn't start correctly
+        'SERVERRUNNING'     : 0x01, # Game is already running, no point starting another instance
+        'SUCCESSNOPIDFILE'  : 0x02, # Openttd started succesfully, but could not write to openttd.pid
+        'FAILEXECUTE'       : 0x03, # Couldn't run the command
+        'FAILNOPIDFOUND'    : 0x04, # No pid found in OpenTTD output, OpenTTD probably didn't start correctly
     }
     return values
 

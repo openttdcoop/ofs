@@ -49,6 +49,8 @@ def main():
 
     newRevision = getLatestVersion(branch)
     svnCommand += newRevision
+    if not os.path.isdir(sourcedir):
+        exit(ReturnValues.get('FAILNOSOURCEDIR'))
 
     # we'll want to work from sourcedir from here on out
     os.chdir(sourcedir)
@@ -96,7 +98,6 @@ def getLatestVersion(branch):
 def assignReturnValues():
     values = {
         'SUCCESS'           : 0x00, # OpenTTD started successfully, pid written to openttd.pid
-        'INVALIDCONFIG'     : 0x01, # Program could not read from configuration file.
         'FAILNOSOURCEDIR'   : 0x02, # Source directory does not exist
         'FAILINVALIDBRANCH' : 0x03, # Config file contains an invalid branch
         'FAILUPDATEERROR'   : 0x04, # SVN or make failed to run successfully

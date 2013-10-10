@@ -41,7 +41,7 @@ def main():
         saveUrl = sys.argv[1]
 
     if not os.path.isdir(savedir):
-        print 'Error: Savedir "%s" is invalid. Please modify %s' % (savedir, configfile)
+        print 'Error: Savedir "%s" is invalid.' % savedir
         exit(ReturnValues.get('INVALIDSAVEDIR'))
 
     savegame = downloadFile(saveUrl, savedir)
@@ -72,9 +72,9 @@ def downloadFile(url, directory):
 def assignReturnValues():
     values = {
         'SUCCESS'         : 0x00, # Program finished successfully
-        'INVALIDSAVEDIR'  : 0x03, # Savedir is not a valid or existing directory
-        'DOWNLOADFAILED'  : 0x04, # Failed to write downloaded file to disk
-        'BADURL'          : 0x05, # Download failed due to bad url (eg, 404, not an actual url)
+        'INVALIDSAVEDIR'  : 0x01, # Savedir is not a valid or existing directory
+        'DOWNLOADFAILED'  : 0x02, # Failed to write downloaded file to disk
+        'BADURL'          : 0x03, # Download failed due to bad url (eg, 404, not an actual url)
     }
     return values
 
