@@ -55,10 +55,10 @@ def main():
     # we'll want to work from sourcedir from here on out
     os.chdir(sourcedir)
 
-    if not execute(svnCommand, shell = True)
+    if not execute(svnCommand, shell = True):
         exit(ReturnValues.get('FAILUPDATEERROR'))
 
-    if not execute('make bundle', shell = True)
+    if not execute('make bundle', shell = True):
         exit(ReturnValues.get('FAILUPDATEERROR'))
 
     print 'Successfully updated OpenTTD to %s' % newRevision
