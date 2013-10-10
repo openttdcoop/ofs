@@ -16,68 +16,54 @@
 # <http://www.gnu.org/licenses/>.
 ###
 
-import ConfigParser
+
+
+# Where all the savegames go.
+savedir = './save'
+
+
+
+# -------------------- DO NOT EDIT ANYTHING BELOW THIS LINE --------------------
+
 import sys
-import optparse
-import os
 import os.path
-import urllib2
+from urllib2 import urlopen, HTTPError, URLError
 
 def main():
     ReturnValues = assignReturnValues()
-    # set current working directory to wherever ofs-getsave is located
+    # set current working directory to wherever ofs-getsave is located in case of relative paths
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    oParser = optparse.OptionParser(usage='Usage: %prog [options] [server-id] savegame-url')
-    oParser.add_option('-C', '--config',
-        help = 'specify alternate configuration file',
-        dest = 'configfile', default = None, metavar = 'CONFIGFILE', type = 'string')
-    options, args = oParser.parse_args()
 
-    if options.configfile:
-        configfile = options.configfile
-    else:
-        configfile = 'ofs.conf'
-    if not os.path.isfile(configfile):
-        print 'Couldn\'t read configuration from %s. Please make sure it exists or supply a different file' % os.path.join(os.getcwd(), configfile))
-        sys.exit(ReturnValues.get('INVALIDCONFIG'))
-    config = ConfigParser.ConfigParser()
-    config.read(configfile)
-
-    if len(args) < 1:
+    if len(sys.argv) <= 1:
         print 'Error: No URL supplied.'
-        sys.exit(ReturnValues.get('BADURL'))
-    serverID = 'default'
-    if len(args) > 1:
-        if args[0] in config.sections():
-            serverID = args[0]
-        saveUrl = args[1]
+        exit(ReturnValues.get('BADURL'))
     else:
-        saveUrl = args[0]
+        saveUrl = sys.argv[1]
 
-    savedir = config.get(serverID, 'savedir')
     if not os.path.isdir(savedir):
-        print 'Savedir "%s" is invalid. Please modify %s' % (savedir, configfile)
-        sys.exit(ReturnValues.get('INVALIDSAVEDIR'))
+        print 'Error: Savedir "%s" is invalid. Please modify %s' % (savedir, configfile)
+        exit(ReturnValues.get('INVALIDSAVEDIR'))
 
     savegame = downloadFile(saveUrl, savedir)
     if isinstance(savegame, tuple):
-        print 'Encountered error %s while downloading %s. File not saved' % (savegame[0], savegame[1])
-        sys.exit(ReturnValues.get('BADURL'))
+        print 'Error: Encountered error %s while downloading %s. File not saved' % (savegame[0], savegame[1])
+        exit(ReturnValues.get('BADURL'))
     elif not os.path.isfile(savegame):
-        print 'File downloaded succesfully, but file was not written. Please check your permissions on %s' % savedir
-        sys.exit(ReturnValues.get('DOWNLOADFAILED'))
+        print 'Error: File downloaded succesfully, but file was not written. Please check your permissions on %s' % savedir
+        exit(ReturnValues.get('DOWNLOADFAILED'))
+
     print 'File downloaded succesfully. File saved as %s' % savegame
-    sys.exit(ReturnValues.get('SUCCESS'))
+    exit(ReturnValues.get('SUCCESS'))
 
 def downloadFile(url, directory):
     try:
         savefile = os.path.join(directory, os.path.basename(url))
-        f = urllib2.urlopen(url)
-        with open(savefile, "wb") as local_file:
-            local_file.write(f.read())
-    except urllib2.HTTPError, e:
+        game = urlopen(url)
+        with open(savefile, 'wb') as local_file:
+            local_file.write(game.read())
+    except HTTPError, e:
         return (e.code, url)
-    except urllib2.URLError, e:
+    except URLError, e:
         return (e.reason, url)
     except IOError:
         return 'couldn\'t write file'
@@ -86,10 +72,9 @@ def downloadFile(url, directory):
 def assignReturnValues():
     values = {
         'SUCCESS'         : 0x00, # Program finished successfully
-        'INVALIDCONFIG'   : 0x01, # Program could not read from configuration file.
-        'INVALIDSAVEDIR'  : 0x02, # Savedir is not a valid or existing directory
-        'DOWNLOADFAILED'  : 0x03, # Failed to write downloaded file to disk
-        'BADURL'          : 0x04, # Download failed due to bad url (eg, 404, not an actual url)
+        'INVALIDSAVEDIR'  : 0x03, # Savedir is not a valid or existing directory
+        'DOWNLOADFAILED'  : 0x04, # Failed to write downloaded file to disk
+        'BADURL'          : 0x05, # Download failed due to bad url (eg, 404, not an actual url)
     }
     return values
 

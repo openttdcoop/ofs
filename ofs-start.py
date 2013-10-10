@@ -16,53 +16,35 @@
 # <http://www.gnu.org/licenses/>.
 ###
 
-import ConfigParser
-from subprocess import check_output, CalledProcessError
+
+
+# Where the openttd executable is located
+gamedir = './'
+# Where all the auto-saves go.
+autosavedir = './save/autosave/'
+# The game gets run with -Dfgc. Add any additional parameters here
+parameters = ''
+
+
+
+# -------------------- DO NOT EDIT ANYTHING BELOW THIS LINE --------------------
+
+from subprocess import Popen, PIPE, CalledProcessError
 import sys
-import optparse
-import os
 import os.path
 
 def main():
     ReturnValues = assignReturnValues()
-    # set current working directory to wherever ofs-start is located
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    oParser = optparse.OptionParser(usage='Usage: %prog [options] [server-id]')
-    oParser.add_option('-C', '--config',
-        help = 'specify alternate configuration file',
-        dest = 'configfile', default = None, metavar = 'CONFIGFILE', type = 'string')
-    options, args = oParser.parse_args()
 
-    if options.configfile:
-        configfile = options.configfile
-    else:
-        configfile = 'ofs.conf'
-    if not os.path.isfile(configfile):
-        print 'Couldn\'t read configuration from %s. Please make sure it exists or supply a different file' % os.path.join(os.getcwd(), configfile))
-        sys.exit(ReturnValues.get('INVALIDCONFIG'))
-    config = ConfigParser.ConfigParser()
-    config.read(configfile)
 
-    serverID = 'default'
-    if len(args) >= 1 and args[0] in config.sections():
-        serverID = args[0]
-
-    gamedir = config.get(serverID, 'gamedir')
-    if not os.path.isdir(gamedir):
-        sys.exit(ReturnValues.get('FAILNOGAMEDIR'))
     executable = os.path.join(gamedir, 'openttd')
-    if not os.path.isfile(executable):
-        sys.exit(ReturnValues.get('FAILNOEXECTUABLE'))
     pidfile = os.path.join(gamedir, 'openttd.pid')
     status = checkStatus(pidfile, executable)
     if status:
-        sys.exit(ReturnValues.get('SERVERRUNNING'))
+        exit(ReturnValues.get('SERVERRUNNING'))
+
     serverconfig = os.path.join(gamedir, 'openttd.cfg')
-    if not os.path.isfile(serverconfig):
-        sys.exit(ReturnValues.get('FAILNOSERVERCONF'))
-    autosavedir = os.path.join(config.get(serverID, 'savedir'), 'autosave/')
     lastsave = getLatestAutoSave(autosavedir)
-    parameters = config.get(serverID, 'parameters')
 
     command = '%s -D -f -c %s' % (executable, serverconfig)
     if not lastsave == None and os.path.isfile(lastsave):
@@ -70,18 +52,12 @@ def main():
     if parameters:
         command += ' %s' % parameters
 
-    print 'Executing: %s' % command
-    command = command.split(' ')
-    try:
-        output = check_output(command)
-    except OSError as e:
-        sys.exit(ReturnValues.get('FAILOSERROR'))
-    except CalledProcessError as e:
-        print 'Game did not start correctly. Exit code: %s\n Program output:\n %s' % (e.returncode, e.output)
-        sys.exit(ReturnValues.get('FAILNONZEROEXIT'))
+    ottdOutput = execute(command)
+    if not ottdOutput:
+        exit(ReturnValues.get('FAILEXECUTE'))
 
     pid = None
-    for line in output.splitlines():
+    for line in ottdOutput.splitlines():
         print 'OpenTTD output: %s' % line
         if 'Forked to background with pid' in line:
             words = line.split()
@@ -91,9 +67,9 @@ def main():
                     pf.write(str(pid))
             except NameError as e:
                 print 'Couldn\'t write to pidfile: %s' % e
-                sys.exit(ReturnValues.get('SUCCESSNOPIDFILE'))
-            sys.exit(ReturnValues.get('SUCCESS'))
-    sys.exit(ReturnValues.get('FAILNOPIDFOUND'))
+                exit(ReturnValues.get('SUCCESSNOPIDFILE'))
+            exit(ReturnValues.get('SUCCESS'))
+    exit(ReturnValues.get('FAILNOPIDFOUND'))
 
 def checkStatus(pidfile, executable):
     try:
@@ -102,20 +78,42 @@ def checkStatus(pidfile, executable):
     except IOError:
         return False
     exename = os.path.basename(executable)
-    try:
-        output = check_output('ps -A', shell=True)
-    except CalledProcessError as e:
+    psOutput = execute('ps -A', shell = True)
+    if not psOutput:
         print 'Couldn\'t run ps -A'
         return False
-    for line in output.splitlines():
-        if not line == '' and not line == None:
-            fields = line.split()
-            pspid = fields[0]
-            pspname = fields[3]
-            if pspid == pid and pspname == exename:
-                return True
     else:
+        for line in psOutput.splitlines():
+            if not line == '' and not line == None:
+                fields = line.split()
+                pspid = fields[0]
+                pspname = fields[3]
+                if pspid == pid and pspname == exename:
+                    print 'OpenTTD found running at pid: %s' % pspid
+                    return True
+        else:
+            return False
+        print 'OpenTTD is not running'
         return False
+
+def execute(command, shell = False):
+    success = True
+    print 'Executing: "%s"' % command
+    if not shell:
+        command = command.split()
+    try:
+        commandObject = Popen(command, shell=shell, stdout = PIPE)
+    except OSError as e:
+        print 'Could not execute. Please check %s is installed and working' % command.split()[0]
+        return False
+    output = commandObject.stdout.read()
+    commandObject.stdout.close()
+    commandObject.wait()
+    if commandObject.returncode:
+        print '%s exited with status %s\n%s output:\n%s' % (command.split()[0], commandObject.returncode, command.split()[0], output)
+        return False
+    else:
+        return output
 
 def getLatestAutoSave(autosavedir):
     max_mtime = 0
@@ -135,12 +133,9 @@ def assignReturnValues():
         'INVALIDCONFIG'     : 0x01, # Program could not read from configuration file.
         'SERVERRUNNING'     : 0x02, # Game is already running, no point starting another instance
         'SUCCESSNOPIDFILE'  : 0x03, # Openttd started succesfully, but could not write to openttd.pid
-        'FAILNOGAMEDIR'     : 0x04, # Gamedir is invalid or does not exist
-        'FAILNOEXECTUABLE'  : 0x05, # Executable does not exist
-        'FAILNOSERVERCONF'  : 0x06, # No OpenTTD configuration file found
-        'FAILOSERROR'       : 0x07, # Couldn't run the command
-        'FAILNONZEROEXIT'   : 0x08, # OpenTTD returned with exitcode <> 0
-        'FAILNOPIDFOUND'    : 0x09, # No pid found in OpenTTD output, OpenTTD probably didn't start correctly
+        'FAILNOSERVERCONF'  : 0x04, # No OpenTTD configuration file found
+        'FAILEXECUTE'       : 0x05, # Couldn't run the command
+        'FAILNOPIDFOUND'    : 0x06, # No pid found in OpenTTD output, OpenTTD probably didn't start correctly
     }
     return values
 
