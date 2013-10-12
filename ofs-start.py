@@ -35,7 +35,8 @@ import os.path
 
 def main():
     ReturnValues = assignReturnValues()
-
+    # set current working directory to wherever ofs-svntobin is located in case of relative paths
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     executable = os.path.join(gamedir, 'openttd')
     pidfile = os.path.join(gamedir, 'openttd.pid')
