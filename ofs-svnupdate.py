@@ -22,14 +22,13 @@
 # valid values: 'nightlies/trunk', 'stable' and 'testing' (same as stable, but also includes rc's)
 branch = 'nightlies/trunk'
 # directory where you keep the svn checkout. The script will run svn with this directory as working dir
-sourcedir = './'
+sourcedir = '../'
 
 
 
 # -------------------- DO NOT EDIT ANYTHING BELOW THIS LINE --------------------
 
 import re
-from shutil import copy2 as fileCopy
 from subprocess import Popen, PIPE, CalledProcessError
 from sys import exit
 import os, os.path
@@ -53,22 +52,16 @@ def main():
     if not os.path.isdir(sourcedir):
         exit(ReturnValues.get('FAILNOSOURCEDIR'))
 
-    # we'll want to work from sourcedir from here on out
+    # we'll want to work from sourcedir for svn update and make bundle
     os.chdir(sourcedir)
 
     if not execute(svnCommand, shell = True):
         exit(ReturnValues.get('FAILUPDATEERROR'))
 
-    # copy openttd.cfg from the bundle directory to safeguard it as make bundle erases the bundle directory
-    fileCopy(os.path.join(sourcedir, 'bundle/openttd.cfg'), os.path.join(sourcedir, 'openttd.cfg'))
-
     if not execute('make bundle', shell = True):
         exit(ReturnValues.get('FAILUPDATEERROR'))
 
-    # copy openttd.cfg back to the bundle directory, leaving a copy in the sourcedir on purpose as backup
-    fileCopy(os.path.join(sourcedir, 'openttd.cfg'), os.path.join(sourcedir, 'bundle/openttd.cfg'))
-    
-    print 'Successfully updated OpenTTD to %s' % newRevision
+    print 'Successfully updated OpenTTD SVN repository to %s' % newRevision
     exit(ReturnValues.get('SUCCESS'))
 
 def execute(command, shell = False):
@@ -104,10 +97,10 @@ def getLatestVersion(branch):
 
 def assignReturnValues():
     values = {
-        'SUCCESS'           : 0x00, # OpenTTD started successfully, pid written to openttd.pid
-        'FAILNOSOURCEDIR'   : 0x02, # Source directory does not exist
-        'FAILINVALIDBRANCH' : 0x03, # Config file contains an invalid branch
-        'FAILUPDATEERROR'   : 0x04, # SVN or make failed to run successfully
+        'SUCCESS'           : 0x00, # OpenTTD updated successfully
+        'FAILNOSOURCEDIR'   : 0x01, # Source directory does not exist
+        'FAILINVALIDBRANCH' : 0x02, # Config file contains an invalid branch
+        'FAILUPDATEERROR'   : 0x03, # SVN or make failed to run successfully
     }
     return values
 
