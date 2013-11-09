@@ -23,11 +23,15 @@
 branch = 'nightlies/trunk'
 # directory where you keep the svn checkout. The script will run svn with this directory as working dir
 sourcedir = '../'
+# directory which can be accessed through http. The script will add an finger/openttd
+# file here which can be used by Zuu's OttdAu openttd updater. Will be ignored if set to an invalid path or left empty
+webdir = ''
 
 
 
 # -------------------- DO NOT EDIT ANYTHING BELOW THIS LINE --------------------
 
+from datetime import datetime
 import re
 from subprocess import Popen, PIPE, CalledProcessError
 from sys import exit
@@ -61,6 +65,13 @@ def main():
     if not execute('make bundle', shell = True):
         exit(ReturnValues.get('FAILUPDATEERROR'))
 
+    if os.path.isdir(webdir):
+        finger = os.path.join(webdir, 'finger/')
+        if not os.path.isdir(finger):
+            create fingerdir
+        fingerfile = os.path.join(finger, 'openttd')
+        with open(fingerfile, 'w') as ff:
+            ff.write('%s %s %s' % (newRevision, date time, branch))
     print 'Successfully updated OpenTTD SVN repository to %s' % newRevision
     exit(ReturnValues.get('SUCCESS'))
 
