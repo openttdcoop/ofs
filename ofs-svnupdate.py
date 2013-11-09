@@ -67,11 +67,11 @@ def main():
 
     if os.path.isdir(webdir):
         finger = os.path.join(webdir, 'finger/')
-        if not os.path.isdir(finger):
-            create fingerdir
+        if not os.path.exists(finger):
+            os.mkdir(finger)
         fingerfile = os.path.join(finger, 'openttd')
         with open(fingerfile, 'w') as ff:
-            ff.write('%s %s %s' % (newRevision, date time, branch))
+            ff.write('%s\t%s\t%s' % (newRevision, datetime, branch))
     print 'Successfully updated OpenTTD SVN repository to %s' % newRevision
     exit(ReturnValues.get('SUCCESS'))
 
