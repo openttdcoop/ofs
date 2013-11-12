@@ -25,8 +25,8 @@ savedir = './save'
 
 # -------------------- DO NOT EDIT ANYTHING BELOW THIS LINE --------------------
 
+import os, os.path
 import sys
-import os.path
 from urllib2 import urlopen, HTTPError, URLError
 
 def main():
@@ -36,24 +36,24 @@ def main():
 
     if len(sys.argv) <= 1:
         print 'Error: No URL supplied.'
-        exit(ReturnValues.get('BADURL'))
+        sys.exit(ReturnValues.get('BADURL'))
     else:
         saveUrl = sys.argv[1]
 
     if not os.path.isdir(savedir):
         print 'Error: Savedir "%s" is invalid.' % savedir
-        exit(ReturnValues.get('INVALIDSAVEDIR'))
+        sys.exit(ReturnValues.get('INVALIDSAVEDIR'))
 
     savegame = downloadFile(saveUrl, savedir)
     if isinstance(savegame, tuple):
         print 'Error: Encountered error %s while downloading %s. File not saved' % (savegame[0], savegame[1])
-        exit(ReturnValues.get('BADURL'))
+        sys.exit(ReturnValues.get('BADURL'))
     elif not os.path.isfile(savegame):
         print 'Error: File downloaded succesfully, but file was not written. Please check your permissions on %s' % savedir
-        exit(ReturnValues.get('DOWNLOADFAILED'))
+        sys.exit(ReturnValues.get('DOWNLOADFAILED'))
 
     print 'File downloaded succesfully. File saved as %s' % savegame
-    exit(ReturnValues.get('SUCCESS'))
+    sys.exit(ReturnValues.get('SUCCESS'))
 
 def downloadFile(url, directory):
     try:

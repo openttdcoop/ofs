@@ -31,8 +31,8 @@ gamedir = './'
 # -------------------- DO NOT EDIT ANYTHING BELOW THIS LINE --------------------
 
 from distutils.dir_util import copy_tree, DistutilsFileError
-from sys import exit
 import os, os.path
+from sys import exit
 
 def main():
     ReturnValues = assignReturnValues()

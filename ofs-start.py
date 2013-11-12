@@ -31,7 +31,7 @@ parameters = ''
 
 from subprocess import Popen, PIPE, CalledProcessError
 import sys
-import os.path
+import os, os.path
 
 def main():
     ReturnValues = assignReturnValues()
@@ -98,7 +98,6 @@ def checkStatus(pidfile, executable):
         return False
 
 def execute(command, shell = False):
-    success = True
     print 'Executing: "%s"' % command
     if not shell:
         command = command.split()

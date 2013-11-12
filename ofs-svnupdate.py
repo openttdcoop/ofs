@@ -33,10 +33,10 @@ webdir = ''
 # -------------------- DO NOT EDIT ANYTHING BELOW THIS LINE --------------------
 
 from datetime import datetime
+import os, os.path
 import re
 from subprocess import Popen, PIPE, CalledProcessError
 from sys import exit
-import os, os.path
 from urllib2 import urlopen
 
 def main():
@@ -78,7 +78,6 @@ def main():
     exit(ReturnValues.get('SUCCESS'))
 
 def execute(command, shell = False):
-    success = True
     print 'Executing: "%s"' % command
     if not shell:
         command = command.split()
