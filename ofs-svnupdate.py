@@ -71,7 +71,7 @@ def main():
         if not os.path.exists(finger):
             os.mkdir(finger)
         fingerfile = os.path.join(finger, 'openttd')
-        curTime = datetime.strftime('%Y-%m-%d %H:%M:%S%z')
+        curTime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S%z')
         with open(fingerfile, 'w') as ff:
             ff.write('%s\t%s\t%s' % (newRevision, curTime, branch))
     print 'Successfully updated OpenTTD SVN repository to %s' % newRevision
