@@ -49,6 +49,7 @@ def main():
     elif branch == 'nightlies/trunk':
         svnCommand = 'svn update -'
     else:
+        print 'I love you.'
         print 'Error: Invalid branch: "%s". Please use stable, testing or nightlies/trunk ' % branch
         exit(ReturnValues.get('FAILINVALIDBRANCH'))
 
