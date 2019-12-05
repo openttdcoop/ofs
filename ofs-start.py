@@ -59,7 +59,7 @@ def main():
 
     pid = None
     for line in ottdOutput.splitlines():
-        print 'OpenTTD output: %s' % line
+        print('OpenTTD output: %s' % line)
         if 'Forked to background with pid' in line:
             words = line.split()
             pid = words[6]
@@ -67,7 +67,7 @@ def main():
                 with open(pidfile, 'w') as pf:
                     pf.write(str(pid))
             except NameError as e:
-                print 'Couldn\'t write to pidfile: %s' % e
+                print('Couldn\'t write to pidfile: %s' % e)
                 exit(ReturnValues.get('SUCCESSNOPIDFILE'))
             exit(ReturnValues.get('SUCCESS'))
     exit(ReturnValues.get('FAILNOPIDFOUND'))
@@ -81,7 +81,7 @@ def checkStatus(pidfile, executable):
     exename = os.path.basename(executable)
     psOutput = execute('ps -A', shell = True)
     if not psOutput:
-        print 'Couldn\'t run ps -A'
+        print('Couldn\'t run ps -A')
         return False
     else:
         for line in psOutput.splitlines():
@@ -90,27 +90,27 @@ def checkStatus(pidfile, executable):
                 pspid = fields[0]
                 pspname = fields[3]
                 if pspid == pid and pspname == exename:
-                    print 'OpenTTD found running at pid: %s' % pspid
+                    print('OpenTTD found running at pid: %s' % pspid)
                     return True
         else:
             return False
-        print 'OpenTTD is not running'
+        print('OpenTTD is not running')
         return False
 
 def execute(command, shell = False):
-    print 'Executing: "%s"' % command
+    print('Executing: "%s"' % command)
     if not shell:
         command = command.split()
     try:
         commandObject = Popen(command, shell=shell, stdout = PIPE)
     except OSError as e:
-        print 'Could not execute. Please check %s is installed and working' % command.split()[0]
+        print('Could not execute. Please check %s is installed and working' % command.split()[0])
         return False
     output = commandObject.stdout.read()
     commandObject.stdout.close()
     commandObject.wait()
     if commandObject.returncode:
-        print '%s exited with status %s\n%s output:\n%s' % (command.split()[0], commandObject.returncode, command.split()[0], output)
+        print('%s exited with status %s\n%s output:\n%s' % (command.split()[0], commandObject.returncode, command.split()[0], output))
         return False
     else:
         return output

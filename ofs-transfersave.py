@@ -48,7 +48,7 @@ def main(localdir, host, port, destdir, savename):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     if len(sys.argv) <= 2:
-        print 'Error: Not enough parameters'
+        print('Error: Not enough parameters')
         sys.exit(ReturnValues.get('BADPARAMETERS'))
     else:
         gameID = sys.argv[1]
@@ -57,7 +57,7 @@ def main(localdir, host, port, destdir, savename):
     savename = savename.replace('{ID}', gameID)
     localfile = os.path.join(localdir, sourcegame)
     if not os.path.isfile(localfile):
-        print 'Could not locate local file %s. Please check for typo\'s' % localfile
+        print('Could not locate local file %s. Please check for typo\'s' % localfile)
         sys.exit(ReturnValues.get('NOSOURCE'))
 
     destfile = os.path.join(destdir, savename)
@@ -67,56 +67,56 @@ def main(localdir, host, port, destdir, savename):
         sshCommand = 'ssh -p%d %s test -f %s' % (port, host, pipes.quote(destfile))
         returnCode = executeTest(sshCommand)
         if returnCode == 255:
-            print 'Error: SSH returned errorcode 255, check your configuration' % (
-                sshCommand[0], commandObject.returncode, sshCommand[0], output)
+            print('Error: SSH returned errorcode 255, check your configuration' % (
+                sshCommand[0], commandObject.returncode, sshCommand[0], output))
             sys.exit(ReturnValues.get('BADCONFIG'))
         fileExists = (returnCode == 0)
     if fileExists:
-        print 'Destination file %s already exists. Exiting without transfer' % destfile
+        print('Destination file %s already exists. Exiting without transfer' % destfile)
         sys.exit(ReturnValues.get('FILEEXISTS'))
 
     if host == 'local':
         try:
             copy(os.path.abspath(localfile), os.path.abspath(destfile))
         except IOError as e:
-            print 'Something went wrong whilst copying the file: %s' % e.strerror
+            print('Something went wrong whilst copying the file: %s' % e.strerror)
             sys.exit(ReturnValues.get('FAILED'))
-        print '%s succesfully saved' % savename
+        print('%s succesfully saved' % savename)
         sys.exit(ReturnValues.get('SUCCESS'))
     else:
         destination = '%s:%s' % (host, destfile)
         command = 'scp -P%d %s %s' % (port, localfile, destination)
         if not execute(command, shell=True):
-            print 'Something went wrong whilst copying the file'
+            print('Something went wrong whilst copying the file')
             sys.exit(ReturnValues.get('FAILED'))
         else:
-            print '%s succesfully saved' % savename
+            print('%s succesfully saved' % savename)
             sys.exit(ReturnValues.get('SUCCESS'))
 
 def execute(command, shell = False):
-    print 'Executing: "%s"' % command
+    print('Executing: "%s"' % command)
     if not shell:
         command = command.split()
     try:
         commandObject = Popen(command, shell=shell, stdout = PIPE)
     except OSError as e:
-        print 'Error: Could not execute. Please check %s is installed and working' % command.split()[0]
+        print('Error: Could not execute. Please check %s is installed and working' % command.split()[0])
         return False
     output = commandObject.stdout.read()
     commandObject.stdout.close()
     commandObject.wait()
     if commandObject.returncode:
-        print 'Error: %s sys.exited with status %s\n%s output:\n%s' % (command.split()[0], commandObject.returncode, command.split()[0], output)
+        print('Error: %s sys.exited with status %s\n%s output:\n%s' % (command.split()[0], commandObject.returncode, command.split()[0], output))
         return False
     else:
         return True
 
 def executeTest(command):
-    print 'Executing: "%s"' % command
+    print('Executing: "%s"' % command)
     try:
         commandObject = Popen(command, shell=True)
     except OSError as e:
-        print 'Error: Could not execute. Please check %s is installed and working' % command.split()[0]
+        print('Error: Could not execute. Please check %s is installed and working' % command.split()[0])
         return False
     commandObject.wait()
     return commandObject.returncode

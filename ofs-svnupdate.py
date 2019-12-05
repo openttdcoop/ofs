@@ -37,7 +37,7 @@ import os, os.path
 import re
 from subprocess import Popen, PIPE, CalledProcessError
 from sys import exit
-from urllib2 import urlopen
+from urllib.request import urlopen
 
 def main():
     ReturnValues = assignReturnValues()
@@ -49,7 +49,7 @@ def main():
     elif branch == 'nightlies/trunk':
         svnCommand = 'svn update -'
     else:
-        print 'Error: Invalid branch: "%s". Please use stable, testing or nightlies/trunk ' % branch
+        print('Error: Invalid branch: "%s". Please use stable, testing or nightlies/trunk ' % branch)
         exit(ReturnValues.get('FAILINVALIDBRANCH'))
 
     newRevision = getLatestVersion(branch)
@@ -74,23 +74,23 @@ def main():
         curTime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S%z')
         with open(fingerfile, 'w') as ff:
             ff.write('%s\t%s\t%s' % (newRevision, curTime, branch))
-    print 'Successfully updated OpenTTD SVN repository to %s' % newRevision
+    print('Successfully updated OpenTTD SVN repository to %s' % newRevision)
     exit(ReturnValues.get('SUCCESS'))
 
 def execute(command, shell = False):
-    print 'Executing: "%s"' % command
+    print('Executing: "%s"' % command)
     if not shell:
         command = command.split()
     try:
         commandObject = Popen(command, shell=shell, stdout = PIPE)
     except OSError as e:
-        print 'Error: Could not execute. Please check %s is installed and working' % command.split()[0]
+        print('Error: Could not execute. Please check %s is installed and working' % command.split()[0])
         return False
     output = commandObject.stdout.read()
     commandObject.stdout.close()
     commandObject.wait()
     if commandObject.returncode:
-        print 'Error: %s exited with status %s\n%s output:\n%s' % (command.split()[0], commandObject.returncode, command.split()[0], output)
+        print('Error: %s exited with status %s\n%s output:\n%s' % (command.split()[0], commandObject.returncode, command.split()[0], output))
         return False
     else:
         return output

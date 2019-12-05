@@ -42,8 +42,8 @@ def main():
     sourcefiles = os.path.join(sourcedir, 'bundle/')
     try:
         copy_tree(sourcefiles, gamedir, verbose=1)
-    except DistutilsFileError, e:
-        print str(e)
+    except DistutilsFileError as e:
+        print(str(e))
         exit(ReturnValues.get('FAILURE'))
 
 def assignReturnValues():

@@ -27,7 +27,8 @@ savedir = './save'
 
 import os, os.path
 import sys
-from urllib2 import urlopen, HTTPError, URLError
+from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
 
 def main():
     ReturnValues = assignReturnValues()
@@ -35,24 +36,24 @@ def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     if len(sys.argv) <= 1:
-        print 'Error: No URL supplied.'
+        print('Error: No URL supplied.')
         sys.exit(ReturnValues.get('BADURL'))
     else:
         saveUrl = sys.argv[1]
 
     if not os.path.isdir(savedir):
-        print 'Error: Savedir "%s" is invalid.' % savedir
+        print('Error: Savedir "%s" is invalid.' % savedir)
         sys.exit(ReturnValues.get('INVALIDSAVEDIR'))
 
     savegame = downloadFile(saveUrl, savedir)
     if isinstance(savegame, tuple):
-        print 'Error: Encountered error %s while downloading %s. File not saved' % (savegame[0], savegame[1])
+        print('Error: Encountered error %s while downloading %s. File not saved' % (savegame[0], savegame[1]))
         sys.exit(ReturnValues.get('BADURL'))
     elif not os.path.isfile(savegame):
-        print 'Error: File downloaded succesfully, but file was not written. Please check your permissions on %s' % savedir
+        print('Error: File downloaded succesfully, but file was not written. Please check your permissions on %s' % savedir)
         sys.exit(ReturnValues.get('DOWNLOADFAILED'))
 
-    print 'File downloaded succesfully. File saved as %s' % savegame
+    print('File downloaded succesfully. File saved as %s' % savegame)
     sys.exit(ReturnValues.get('SUCCESS'))
 
 def downloadFile(url, directory):
@@ -61,9 +62,9 @@ def downloadFile(url, directory):
         game = urlopen(url)
         with open(savefile, 'wb') as local_file:
             local_file.write(game.read())
-    except HTTPError, e:
+    except HTTPError as e:
         return (e.code, url)
-    except URLError, e:
+    except URLError as e:
         return (e.reason, url)
     except IOError:
         return 'couldn\'t write file'
