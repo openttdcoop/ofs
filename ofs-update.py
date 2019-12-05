@@ -20,7 +20,7 @@
 
 # the svn-branch you wish to update to. This should not be changed from the currently installed branch
 # valid values: 'nightlies/trunk', 'stable' and 'testing' (same as stable, but also includes rc's)
-branch = 'nightlies/trunk'
+branch = 'master'
 # directory where you keep the svn checkout. The script will run svn with this directory as working dir
 sourcedir = '../'
 # directory which can be accessed through http. The script will add a finger/openttd
@@ -45,22 +45,22 @@ def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     if branch == 'stable' or branch == 'testing':
-        svnCommand = 'svn switch svn://svn.openttd.org/tags/'
-    elif branch == 'nightlies/trunk':
-        svnCommand = 'svn update -'
+        gitCommand = 'git checkout'
+    elif branch == 'master':
+        gitCommand = 'git checkout'
     else:
         print('Error: Invalid branch: "%s". Please use stable, testing or nightlies/trunk ' % branch)
         exit(ReturnValues.get('FAILINVALIDBRANCH'))
 
     newRevision = getLatestVersion(branch)
-    svnCommand += newRevision
+    gitCommand += newRevision
     if not os.path.isdir(sourcedir):
         exit(ReturnValues.get('FAILNOSOURCEDIR'))
 
     # we'll want to work from sourcedir for svn update and make bundle
     os.chdir(sourcedir)
 
-    if not execute(svnCommand, shell = True):
+    if not execute(gitCommand, shell = True):
         exit(ReturnValues.get('FAILUPDATEERROR'))
 
     if not execute('make bundle', shell = True):
